@@ -1,2 +1,3 @@
-# template-orchestration-svc
-Template repository for python based GCP orchestration layer microservice 
+# lookup-codes-orchestration-svc
+orchestration layer for global lookup codes service
+

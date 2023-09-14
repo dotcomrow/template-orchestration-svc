@@ -1,0 +1,92 @@
+name: "Deploy to Google Cloud Run"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+            find: "<SECRET_KEY>"
+            replace: ${{ secrets.SECRET_KEY }}
+            regex: false
+
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<PROJECT_ID>"
+                replace: ${{ vars.PROJECT_ID }}
+                regex: false
+
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<GOOGLE_OAUTH_CLIENT_ID>"
+                replace: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+                regex: false
+        
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<GOOGLE_OAUTH_CLIENT_SECRET>"
+                replace: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+                regex: false
+
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<AUDIENCE>"
+                replace: ${{ secrets.AUDIENCE }}
+                regex: false
+
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<DATA_LAYER_URL>"
+                replace: ${{ secrets.DATA_LAYER_URL }}
+                regex: false
+        
+        - name: Find and Replace
+          uses: jacobtomlinson/gha-find-replace@v3
+          with:
+                find: "<OL_SERVICE_URL>"
+                replace: ${{ vars.OL_SERVICE_URL }}
+                regex: false
+
+        - name: get repository name
+          run: echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+        - id: 'auth'
+          uses: 'google-github-actions/auth@v1'
+          with:
+            credentials_json: '${{ secrets.GOOGLE_CREDENTIALS_RAW }}'
+
+        - name: Set up Google Cloud SDK
+          uses: google-github-actions/setup-gcloud@v1.1.1
+
+        - name: Configure docker for GCP
+          run: gcloud auth configure-docker
+
+        - name: Build and push Docker image
+          uses: docker/build-push-action@v2
+          with:
+            context: .
+            push: true
+            tags: gcr.io/${{ vars.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}:latest
+            build-args: |
+              HTTP_PORT=8080
+
+        - name: Deploy to Cloud Run
+          uses: google-github-actions/deploy-cloudrun@v1
+          with:
+            image: gcr.io/${{ vars.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}:latest
+            service: ${{ env.REPOSITORY_NAME }}
+            region: ${{ vars.REGION }}
