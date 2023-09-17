@@ -5,6 +5,8 @@ import google.cloud.logging
 import logging
 import json
 import schema as ormSchema
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 from openapi_gen.lib.wrappers import swagger_metadata
 from openapi_gen.lib.security import OAuth as SwaggerOAuth
 from openapi_gen.swagger import Swagger
@@ -28,13 +30,13 @@ oauth = OAuth(app)
          
 def authorized_user_decorator(func):
     def inner(*args, **kwargs):
-        # resp_token = google.oauth2.id_token.fetch_id_token(google_requests.Request(), audience)
-        # user = id_token.verify_oauth2_token(resp_token, google_requests.Request(), app.config['GOOGLE_CLIENT_ID'])
-        
+        resp_token = google.oauth2.id_token.fetch_id_token(google_requests.Request(), audience)
+        user = id_token.verify_oauth2_token(resp_token, google_requests.Request(), app.config['GOOGLE_CLIENT_ID'])
+        kwargs["user"]= user
         return func(*args, **kwargs)
     
         # if authorizedUsers is not None and str(authorizedUsers).lower().count(user['email'].lower()) > 0:
-        #     kwargs["user"]= user
+        #     
             
         # else:
         #     return Response(response=json.dumps({'message': 'Unauthorized'}), status=401, mimetype="application/json")
@@ -64,6 +66,7 @@ def get(project_id, item_id, **kwargs):
     
 @app.route("/" + context_root + "/<project_id>", methods=['POST'])
 @cross_origin(supports_credentials=True)
+@authorized_user_decorator
 @swagger_metadata(
     summary='Create Lookup Code by project ID',
     description='Creates new lookup code for a project',
@@ -79,6 +82,7 @@ def post(project_id, **kwargs):
     
 @app.route("/" + context_root + "/<project_id>/<item_id>", methods=['PUT'])
 @cross_origin(supports_credentials=True)
+@authorized_user_decorator
 @swagger_metadata(
     summary='Update Lookup Code by project and item ID',
     description='Updates a lookup code by project and item id',
@@ -94,6 +98,7 @@ def put(project_id, item_id, **kwargs):
     
 @app.route("/" + context_root + "/<project_id>/<item_id>", methods=['DELETE'])
 @cross_origin(supports_credentials=True)
+@authorized_user_decorator
 @swagger_metadata(
     summary='Delete Lookup Code by project and item ID',
     description='Deletes a lookup code by project and item id',
