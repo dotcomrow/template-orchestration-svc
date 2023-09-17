@@ -40,6 +40,8 @@ def authorized_user_decorator(func):
             
         # else:
         #     return Response(response=json.dumps({'message': 'Unauthorized'}), status=401, mimetype="application/json")
+    
+    inner.__name__ = func.__name__
     return inner
 
 @app.before_request
