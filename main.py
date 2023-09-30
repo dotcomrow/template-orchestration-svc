@@ -50,7 +50,6 @@ def basic_authentication():
 @app.route("/" + context_root + "/<project_id>", defaults={'item_id': None}, methods=['GET'])
 @app.route("/" + context_root + "/<project_id>/<item_id>", methods=['GET'])
 @cross_origin(supports_credentials=True)
-@authorized_user_decorator
 @swagger_metadata(
     summary='Get lookup code data',
     description='Get lookup code(s) by project id or by project and item id',
