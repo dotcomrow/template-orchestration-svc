@@ -1,12 +1,11 @@
 from flask import Flask, request, Response
-from authlib.integrations.flask_client import OAuth
 from flask_cors import CORS, cross_origin
 import google.cloud.logging
 import logging
 import json
 import schema as ormSchema
 from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
+from google.auth.transport import requests
 from openapi_gen.lib.wrappers import swagger_metadata
 from openapi_gen.lib.security import OAuth as SwaggerOAuth
 from openapi_gen.swagger import Swagger
@@ -26,25 +25,19 @@ cors = CORS(app, resources={
     r"/*": {"origins": "*"},
     # r"/login": {"origins": "*"},
 }, supports_credentials=True)
-oauth = OAuth(app)
          
 def authorized_user_decorator(func):
     def inner(*args, **kwargs):
-        resp_token = google.oauth2.id_token.fetch_id_token(google_requests.Request(), audience)
-        user = id_token.verify_oauth2_token(resp_token, google_requests.Request(), app.config['GOOGLE_CLIENT_ID'])
-        kwargs["user"]= user
-        
-        if user is None:
+        try:
+            token = request.headers.get('Authorization').split(" ")[1]
+            user = id_token.verify_oauth2_token(token, requests.Request(), app.config['GOOGLE_CLIENT_SECRET'])
+            kwargs["user"]= user
+        except Exception as e:
+            logging.error("Error: " + str(e))
             return Response(response=json.dumps({'message': 'Unauthorized'}), status=401, mimetype="application/json")
-        
+ 
         return func(*args, **kwargs)
-    
-        # if authorizedUsers is not None and str(authorizedUsers).lower().count(user['email'].lower()) > 0:
-        #     
-            
-        # else:
-        #     return Response(response=json.dumps({'message': 'Unauthorized'}), status=401, mimetype="application/json")
-    
+
     inner.__name__ = func.__name__
     return inner
 
