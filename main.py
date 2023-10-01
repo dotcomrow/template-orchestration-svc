@@ -17,7 +17,6 @@ logClient.setup_logging()
 app = Flask(__name__)
 app.config.from_object('config')
 app.secret_key = app.config['SECRET_KEY']
-audience = app.config['AUDIENCE']
 context_root = app.config['PROJECT_ID']
 # authorizedUsers = ""
 
