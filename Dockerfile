@@ -8,10 +8,6 @@ ENV PYTHONUNBUFFERED True
 
 # Copy local code to the container image.
 ENV APP_HOME /app
-ENV GOOGLE_CLIENT_ID <GOOGLE_OAUTH_CLIENT_ID>
-ENV SECRET_KEY <SECRET_KEY>
-ENV DATA_LAYER_URL <DATA_LAYER_URL>
-ENV PROJECT_ID <PROJECT_ID>
 
 RUN apt-get update
 RUN apt-get -y install curl

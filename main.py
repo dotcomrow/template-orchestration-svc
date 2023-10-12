@@ -29,7 +29,7 @@ def authorized_user_decorator(func):
     def inner(*args, **kwargs):
         try:
             token = request.headers.get('Authorization').split(" ")[1]
-            user = id_token.verify_oauth2_token(token, requests.Request(), app.config['GOOGLE_CLIENT_ID'])
+            user = id_token.verify_oauth2_token(token, requests.Request(), app.config['AUDIENCE'])
             kwargs["user"]= user
         except Exception as e:
             logging.error("Error: " + str(e))
@@ -46,8 +46,7 @@ def basic_authentication():
         return Response()
 
 @app.route("/" + context_root, defaults={'project_id': None, 'item_id': None}, methods=['GET'])
-@app.route("/" + context_root + "/<project_id>", defaults={'item_id': None}, methods=['GET'])
-@app.route("/" + context_root + "/<project_id>/<item_id>", methods=['GET'])
+@app.route("/" + context_root + "/<item_id>", methods=['GET'])
 @cross_origin(supports_credentials=True)
 @swagger_metadata(
     summary='Get lookup code data',
@@ -57,11 +56,10 @@ def basic_authentication():
     security='google',
     scopes=['openid', 'email', 'profile']
 )
-def get(project_id, item_id, **kwargs):
-    user = kwargs.get("user")
-    return handle_get(user, project_id, item_id)
+def get(item_id, **kwargs):
+    return handle_get(item_id)
     
-@app.route("/" + context_root + "/<project_id>", methods=['POST'])
+@app.route("/" + context_root, methods=['POST'])
 @cross_origin(supports_credentials=True)
 @authorized_user_decorator
 @swagger_metadata(
@@ -73,11 +71,11 @@ def get(project_id, item_id, **kwargs):
     security='google',
     scopes=['openid', 'email', 'profile']
 )
-def post(project_id, **kwargs):
+def post(*args, **kwargs):
     user =  kwargs.get("user")
-    return handle_post(user, project_id, request)
+    return handle_post(user, request)
     
-@app.route("/" + context_root + "/<project_id>/<item_id>", methods=['PUT'])
+@app.route("/" + context_root + "/<item_id>", methods=['PUT'])
 @cross_origin(supports_credentials=True)
 @authorized_user_decorator
 @swagger_metadata(
@@ -89,11 +87,11 @@ def post(project_id, **kwargs):
     security='google',
     scopes=['openid', 'email', 'profile']
 )
-def put(project_id, item_id, **kwargs):
+def put(item_id, **kwargs):
     user = kwargs.get("user")
-    return handle_put(user, request, project_id, item_id)
+    return handle_put(user, request, item_id)
     
-@app.route("/" + context_root + "/<project_id>/<item_id>", methods=['DELETE'])
+@app.route("/" + context_root + "/<item_id>", methods=['DELETE'])
 @cross_origin(supports_credentials=True)
 @authorized_user_decorator
 @swagger_metadata(
@@ -104,9 +102,9 @@ def put(project_id, item_id, **kwargs):
     security='google',
     scopes=['openid', 'email', 'profile']
 )
-def delete(project_id, item_id, **kwargs):
+def delete(item_id, **kwargs):
     user = kwargs.get("user")
-    return handle_delete(user, project_id, item_id)
+    return handle_delete(user, item_id)
     
 swagger = Swagger(
     app=app,
