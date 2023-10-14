@@ -11,8 +11,6 @@ ENV APP_HOME /app
 
 RUN apt-get update
 RUN apt-get -y install curl
-RUN curl -fsSL https://deb.nodesource.com/setup_19.x | bash - &&\
-   apt-get install -y nodejs
 
 WORKDIR $APP_HOME
 COPY . ./
