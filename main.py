@@ -119,7 +119,7 @@ swagger = Swagger(
             "https://www.googleapis.com/oauth2/v3/certs"
         )
     ],
-    servers=["<OL_SERVICE_URL>"],
+    servers=[app.config['OL_LAYER_URL']],
     produces=["application/json"],
     schemes=["https"]
 )
