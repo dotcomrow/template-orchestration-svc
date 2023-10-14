@@ -35,9 +35,16 @@ jobs:
             build-args: |
               HTTP_PORT=8080
 
-        - name: Deploy to Cloud Run
-          uses: google-github-actions/deploy-cloudrun@v1
+        - name: Destroy Cloud run service
+          run: gcloud run services delete ${{ env.REPOSITORY_NAME }} --platform managed --region ${{ vars.REGION }} --quiet --project ${{ vars.GCP_PROJECT }}-${{ vars.SUFFIX }}
+
+        - name: Create Apply Run
+          uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+          id: apply-run
+          if: success() || failure()
+          env:
+            TF_MAX_TIMEOUT: 3m
           with:
-            image: gcr.io/${{ secrets.COMMON_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}:latest
-            service: ${{ env.REPOSITORY_NAME }}
-            region: ${{ vars.REGION }}
+            workspace: ${{ vars.TFE_WORKSPACE }}
+            organization: ${{ vars.TF_ORGANIZATION }}
+            token: ${{ secrets.TFE_TOKEN }}
