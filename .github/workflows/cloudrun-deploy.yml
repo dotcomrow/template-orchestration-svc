@@ -35,9 +35,6 @@ jobs:
             build-args: |
               HTTP_PORT=8080
 
-        - name: Destroy Cloud run service
-          run: gcloud run services delete ${{ env.REPOSITORY_NAME }} --platform managed --region ${{ vars.REGION }} --quiet --project ${{ vars.GCP_PROJECT }}-${{ vars.SUFFIX }}
-
         - name: Create Apply Run
           uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
           id: apply-run
