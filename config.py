@@ -7,6 +7,7 @@ DATA_LAYER_URL = os.getenv('DATA_LAYER_URL')
 PROJECT_ID = os.getenv('PROJECT_ID')
 REGION = os.getenv('REGION')
 K_SERVICE = os.getenv('K_SERVICE')
+CONTEXT_ROOT = os.getenv('CONTEXT_ROOT')
 
 METADATA_HEADERS = {'Metadata-Flavor': 'Google'}
 r = requests.get("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token", headers=METADATA_HEADERS)
